@@ -7,8 +7,11 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
+use App\Enums\UserRole;
 
-class User extends Authenticatable
+
+class User extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
@@ -22,6 +25,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+    ];
+    protected $cast = [
+        'role' => UserRole::class,
+        'password'=>'hashed',
     ];
 
     /**
@@ -46,4 +54,11 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function getJWTIdentifier() { 
+        return $this->getKey();
+    }
+    public function getJWTCustomClaims() { 
+        return ['role' => $this->role->value]; 
+    }
+
 }
